@@ -1,23 +1,19 @@
 import datetime
 
-# Inventory with item: [price, quantity]
-inventory = {
-    "Coffee": [50, 100],
-    "Tea": [30, 100],
-    "Sandwich": [80, 50],
-    "Cake": [120, 30]
-}
+# Empty inventory: items must be added manually
+inventory = {}
 
 # Sales record
 sales = []
 
-
 def show_inventory():
     print("\n--- Inventory ---")
-    for item, (price, qty) in inventory.items():
-        print(f"{item}: ₹{price} | Available: {qty}")
-    print()
-
+    if not inventory:
+        print("No items available.")
+    else:
+        for item, (price, qty) in inventory.items():
+            print(f"{item}: ₹{price:.2f} | Available: {qty}")
+    input("\nPress Enter to return to the main menu...")
 
 def add_item():
     item = input("Enter new item name: ").title()
@@ -25,13 +21,12 @@ def add_item():
         print("Item already exists! Use update function instead.")
         return
     try:
-        price = float(input("Enter price of the item: ₹"))
-        qty = int(input("Enter quantity available: "))
+        price = float(input(f"Enter price of {item}: ₹"))
+        qty = int(input(f"Enter quantity of {item}: "))
         inventory[item] = [price, qty]
         print(f"{item} added successfully!")
     except ValueError:
         print("Invalid input! Please enter numbers for price and quantity.")
-
 
 def delete_item():
     item = input("Enter item name to delete: ").title()
@@ -41,13 +36,17 @@ def delete_item():
     else:
         print("Item not found in inventory.")
 
-
 def process_order():
+    if not inventory:
+        print("No items available to order.")
+        return
+
     order = {}
     total = 0
+
     while True:
         show_inventory()
-        item = input("Enter item name (or 'done' to finish order): ").title()
+        item = input("Enter item name to order (or 'done' to finish): ").title()
         if item == 'Done':
             break
         if item not in inventory:
@@ -56,32 +55,41 @@ def process_order():
         try:
             qty = int(input(f"Enter quantity for {item}: "))
         except ValueError:
-            print("Please enter a valid number!")
+            print("Invalid quantity!")
             continue
+
         if qty > inventory[item][1]:
-            print("Insufficient stock!")
+            print(f"Only {inventory[item][1]} {item}(s) available!")
             continue
+
         cost = qty * inventory[item][0]
         inventory[item][1] -= qty
         order[item] = (qty, cost)
         total += cost
+        print(f"Added {qty} {item}(s) to order. Subtotal: ₹{total:.2f}")
+
     if order:
         sales.append((datetime.datetime.now(), order, total))
-        print("\nOrder Summary:")
+        print("\n--- Order Summary ---")
         for item, (qty, cost) in order.items():
-            print(f"{item} x{qty} = ₹{cost}")
-        print(f"Total Bill: ₹{total}\n")
+            print(f"{item} x{qty} = ₹{cost:.2f}")
+        print(f"Total Bill: ₹{total:.2f}")
+    else:
+        print("No items ordered.")
 
+    input("\nPress Enter to return to the main menu...")
 
 def show_sales():
     print("\n--- Sales Record ---")
-    for time, order, total in sales:
-        print(f"\n{time.strftime('%Y-%m-%d %H:%M:%S')}")
-        for item, (qty, cost) in order.items():
-            print(f"{item} x{qty} = ₹{cost}")
-        print(f"Total: ₹{total}")
-    print()
-
+    if not sales:
+        print("No sales yet.")
+    else:
+        for time, order, total in sales:
+            print(f"\n{time.strftime('%Y-%m-%d %H:%M:%S')}")
+            for item, (qty, cost) in order.items():
+                print(f"{item} x{qty} = ₹{cost:.2f}")
+            print(f"Total: ₹{total:.2f}")
+    input("\nPress Enter to return to the main menu...")
 
 def main():
     while True:
@@ -92,7 +100,7 @@ def main():
         print("4. Process Order")
         print("5. View Sales Record")
         print("6. Exit")
-        choice = input("Choose an option: ")
+        choice = input("Choose an option: ").strip()
 
         if choice == '1':
             show_inventory()
@@ -105,11 +113,10 @@ def main():
         elif choice == '5':
             show_sales()
         elif choice == '6':
-            print("Exiting Cafe Management System. Goodbye!")
+            print("Thank you for using Cafe Management System. Goodbye!")
             break
         else:
-            print("Invalid choice! Please select from 1-6.")
-
+            print("Invalid choice. Please select a valid option.")
 
 if __name__ == "__main__":
     main()
